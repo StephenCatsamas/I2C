@@ -158,7 +158,7 @@ void I2C::scan()
   Serial.println();
   for (uint8_t s = 0; s <= 0x7F; s++)
   {
-    returnStatus = 0;
+    uint8_t returnStatus;
     returnStatus = _start();
     if (!returnStatus)
     {
@@ -229,7 +229,7 @@ uint8_t I2C::receive()
 
 uint8_t I2C::write(uint8_t address, uint8_t registerAddress)
 {
-  returnStatus = 0;
+  uint8_t returnStatus;
   returnStatus = _start();
   if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
   
@@ -253,7 +253,7 @@ uint8_t I2C::write(int address, int registerAddress)
 
 uint8_t I2C::write(uint8_t address, uint8_t registerAddress, uint8_t data)
 {
-  returnStatus = 0;
+  uint8_t returnStatus;
   returnStatus = _start();
   if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
   
@@ -280,7 +280,7 @@ uint8_t I2C::write(int address, int registerAddress, int data)
 uint8_t I2C::write(uint8_t address, uint8_t registerAddress, const char *data)
 {
   uint8_t bufferLength = strlen(data);
-  returnStatus = 0;
+  uint8_t returnStatus;
   returnStatus = write(address, registerAddress, (const uint8_t *)data, bufferLength);
   return (returnStatus);
 }
@@ -289,7 +289,7 @@ uint8_t I2C::write(uint8_t address, uint8_t registerAddress, uint16_t data)
 {
   //Array to hold the 2 bytes that will be written to the register
   uint8_t writeBytes[2];
-  returnStatus = 0;
+  uint8_t returnStatus;
 
   writeBytes[0] = (data >> 8) & 0xFF; //MSB
   writeBytes[1] = data & 0xFF;        //LSB
@@ -302,7 +302,7 @@ uint8_t I2C::write(uint8_t address, uint8_t registerAddress, uint32_t data)
 {
   //Array to hold the 4 bytes that will be written to the register
   uint8_t writeBytes[4];
-  returnStatus = 0;
+  uint8_t returnStatus;
 
   writeBytes[0] = (data >> 24) & 0xFF; //MSB
   writeBytes[1] = (data >> 16) & 0xFF;
@@ -317,7 +317,7 @@ uint8_t I2C::write(uint8_t address, uint8_t registerAddress, uint64_t data)
 {
   //Array to hold the 8 bytes that will be written to the register
   uint8_t writeBytes[8];
-  returnStatus = 0;
+  uint8_t returnStatus;
 
   writeBytes[0] = (data >> 56) & 0xFF; //MSB
   writeBytes[1] = (data >> 48) & 0xFF;
@@ -334,7 +334,7 @@ uint8_t I2C::write(uint8_t address, uint8_t registerAddress, uint64_t data)
 
 uint8_t I2C::write(uint8_t address, uint8_t registerAddress, const uint8_t *data, uint8_t numberBytes)
 {
-  returnStatus = 0;
+  uint8_t returnStatus;
   returnStatus = _start();
   if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
   
@@ -370,8 +370,8 @@ uint8_t I2C::read(uint8_t address, uint8_t numberBytes)
   {
     numberBytes++;
   }
-  nack = numberBytes - 1;
-  returnStatus = 0;
+  uint8_t nack = numberBytes - 1;
+  uint8_t returnStatus;
   returnStatus = _start();
   if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
   
@@ -415,8 +415,8 @@ uint8_t I2C::read(uint8_t address, uint8_t registerAddress, uint8_t numberBytes)
   {
     numberBytes++;
   }
-  nack = numberBytes - 1;
-  returnStatus = 0;
+  uint8_t nack = numberBytes - 1;
+  uint8_t returnStatus;
   returnStatus = _start();
   if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
   
@@ -456,14 +456,12 @@ uint8_t I2C::read(uint8_t address, uint8_t registerAddress, uint8_t numberBytes)
 
 uint8_t I2C::read(uint8_t address, uint8_t numberBytes, uint8_t *dataBuffer)
 {
-  bytesAvailable = 0;
-  bufferIndex = 0;
   if (numberBytes == 0)
   {
     numberBytes++;
   }
-  nack = numberBytes - 1;
-  returnStatus = 0;
+  uint8_t nack = numberBytes - 1;
+  uint8_t returnStatus;
   returnStatus = _start();
   if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
   
@@ -483,9 +481,8 @@ uint8_t I2C::read(uint8_t address, uint8_t numberBytes, uint8_t *dataBuffer)
       if(returnStatus){return receive_error_handler(returnStatus);}
     }
     dataBuffer[i] = TWDR;
-    bytesAvailable = i + 1;
-    totalBytes = i + 1;
   }
+  
   returnStatus = _stop();
   if (returnStatus){return stop_error_handler(returnStatus);}
   
@@ -494,14 +491,12 @@ uint8_t I2C::read(uint8_t address, uint8_t numberBytes, uint8_t *dataBuffer)
 
 uint8_t I2C::read(uint8_t address, uint16_t numberBytes, uint8_t *dataBuffer)
 {
-  bytesAvailable = 0;
-  bufferIndex = 0;
   if (numberBytes == 0)
   {
     numberBytes++;
   }
   uint16_t nack = numberBytes - 1;
-  returnStatus = 0;
+  uint8_t returnStatus;
   returnStatus = _start();
   if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
   
@@ -521,8 +516,6 @@ uint8_t I2C::read(uint8_t address, uint16_t numberBytes, uint8_t *dataBuffer)
       if(returnStatus){return receive_error_handler(returnStatus);}
     }
     dataBuffer[i] = TWDR;
-    bytesAvailable = i + 1;
-    totalBytes = i + 1;
   }
   returnStatus = _stop();
   if (returnStatus){return stop_error_handler(returnStatus);}
@@ -532,14 +525,12 @@ uint8_t I2C::read(uint8_t address, uint16_t numberBytes, uint8_t *dataBuffer)
 
 uint8_t I2C::read(uint8_t address, uint8_t registerAddress, uint8_t numberBytes, uint8_t *dataBuffer)
 {
-  bytesAvailable = 0;
-  bufferIndex = 0;
   if (numberBytes == 0)
   {
     numberBytes++;
   }
-  nack = numberBytes - 1;
-  returnStatus = 0;
+  uint8_t nack = numberBytes - 1;
+  uint8_t returnStatus;
   returnStatus = _start();
   if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
   
@@ -568,8 +559,6 @@ uint8_t I2C::read(uint8_t address, uint8_t registerAddress, uint8_t numberBytes,
       if(returnStatus){return receive_error_handler(returnStatus);}
     }
     dataBuffer[i] = TWDR;
-    bytesAvailable = i + 1;
-    totalBytes = i + 1;
   }
   returnStatus = _stop();
   if (returnStatus){return stop_error_handler(returnStatus);}
@@ -579,14 +568,12 @@ uint8_t I2C::read(uint8_t address, uint8_t registerAddress, uint8_t numberBytes,
 
 uint8_t I2C::read(uint8_t address, uint8_t registerAddress, uint16_t numberBytes, uint8_t *dataBuffer)
 {
-  bytesAvailable = 0;
-  bufferIndex = 0;
   if (numberBytes == 0)
   {
     numberBytes++;
   }
   uint16_t nack = numberBytes - 1;
-  returnStatus = 0;
+  uint8_t returnStatus;
   returnStatus = _start();
   if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
   
@@ -615,8 +602,6 @@ uint8_t I2C::read(uint8_t address, uint8_t registerAddress, uint16_t numberBytes
       if(returnStatus){return receive_error_handler(returnStatus);}
     }
     dataBuffer[i] = TWDR;
-    bytesAvailable = i + 1;
-    totalBytes = i + 1;
   }
   returnStatus = _stop();
  if (returnStatus){return stop_error_handler(returnStatus);}
@@ -629,7 +614,7 @@ uint8_t I2C::read(uint8_t address, uint8_t registerAddress, uint16_t numberBytes
 //These functions will be used to write to Slaves that take 16-bit addresses
 uint8_t I2C::write16(uint8_t address, uint16_t registerAddress)
 {
-  returnStatus = 0;
+  uint8_t returnStatus;
   returnStatus = _start();
   if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
   
@@ -651,7 +636,7 @@ uint8_t I2C::write16(uint8_t address, uint16_t registerAddress)
 }
 uint8_t I2C::write16(uint8_t address, uint16_t registerAddress, uint8_t data)
 {
-  returnStatus = 0;
+  uint8_t returnStatus;
   returnStatus = _start();
   if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
   
@@ -677,13 +662,13 @@ uint8_t I2C::write16(uint8_t address, uint16_t registerAddress, uint8_t data)
 uint8_t I2C::write16(uint8_t address, uint16_t registerAddress, const char *data)
 {
   uint8_t bufferLength = strlen(data);
-  returnStatus = 0;
+  uint8_t returnStatus;
   returnStatus = write16(address, registerAddress, (const uint8_t *)data, bufferLength);
   return (returnStatus);
 }
 uint8_t I2C::write16(uint8_t address, uint16_t registerAddress, const uint8_t *data, uint8_t numberBytes)
 {
-  returnStatus = 0;
+  uint8_t returnStatus;
   returnStatus = _start();
   if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
   
@@ -712,7 +697,7 @@ uint8_t I2C::write16(uint8_t address, uint16_t registerAddress, uint16_t data)
 {
   //Array to hold the 2 bytes that will be written to the register
   uint8_t writeBytes[2];
-  returnStatus = 0;
+  uint8_t returnStatus;
 
   writeBytes[0] = (data >> 8) & 0xFF; //MSB
   writeBytes[1] = data & 0xFF;        //LSB
@@ -725,7 +710,7 @@ uint8_t I2C::write16(uint8_t address, uint16_t registerAddress, uint32_t data)
 {
   //Array to hold the 4 bytes that will be written to the register
   uint8_t writeBytes[4];
-  returnStatus = 0;
+  uint8_t returnStatus;
 
   writeBytes[0] = (data >> 24) & 0xFF; //MSB
   writeBytes[1] = (data >> 16) & 0xFF;
@@ -740,7 +725,7 @@ uint8_t I2C::write16(uint8_t address, uint16_t registerAddress, uint64_t data)
 {
   //Array to hold the 8 bytes that will be written to the register
   uint8_t writeBytes[8];
-  returnStatus = 0;
+  uint8_t returnStatus;
 
   writeBytes[0] = (data >> 56) & 0xFF; //MSB
   writeBytes[1] = (data >> 48) & 0xFF;
@@ -764,8 +749,8 @@ uint8_t I2C::read16(uint8_t address, uint16_t registerAddress, uint8_t numberByt
   {
     numberBytes++;
   }
-  nack = numberBytes - 1;
-  returnStatus = 0;
+  uint8_t nack = numberBytes - 1;
+  uint8_t returnStatus;
   returnStatus = _start();
   if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
   
@@ -809,14 +794,12 @@ uint8_t I2C::read16(uint8_t address, uint16_t registerAddress, uint8_t numberByt
 }
 uint8_t I2C::read16(uint8_t address, uint16_t registerAddress, uint8_t numberBytes, uint8_t *dataBuffer)
 {
-  bytesAvailable = 0;
-  bufferIndex = 0;
   if (numberBytes == 0)
   {
     numberBytes++;
   }
-  nack = numberBytes - 1;
-  returnStatus = 0;
+  uint8_t nack = numberBytes - 1;
+  uint8_t returnStatus;
   returnStatus = _start();
   if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
   
@@ -849,8 +832,6 @@ uint8_t I2C::read16(uint8_t address, uint16_t registerAddress, uint8_t numberByt
       if(returnStatus){return receive_error_handler(returnStatus);}
     }
     dataBuffer[i] = TWDR;
-    bytesAvailable = i + 1;
-    totalBytes = i + 1;
   }
   returnStatus = _stop();
   if (returnStatus){return stop_error_handler(returnStatus);}

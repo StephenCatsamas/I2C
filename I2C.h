@@ -143,8 +143,6 @@ public:
 
 private:
   void lockUp();
-  uint8_t returnStatus;
-  uint8_t nack;
   uint8_t data[MAX_BUFFER_SIZE];
   static uint8_t bytesAvailable;
   static uint8_t bufferIndex;
