@@ -231,37 +231,17 @@ uint8_t I2C::write(uint8_t address, uint8_t registerAddress)
 {
   returnStatus = 0;
   returnStatus = _start();
-  if (returnStatus)
-  {
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
+  
   returnStatus = _sendAddress(SLA_W(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (2);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){send_addr_error_handler(returnStatus, TRANSMIT_MODE);}
+  
   returnStatus = _sendByte(registerAddress);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_error_handler(returnStatus);}
+  
   returnStatus = _stop();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (7);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return stop_error_handler(returnStatus);}
+
   return (returnStatus);
 }
 
@@ -270,50 +250,25 @@ uint8_t I2C::write(int address, int registerAddress)
   return (write((uint8_t)address, (uint8_t)registerAddress));
 }
 
+
 uint8_t I2C::write(uint8_t address, uint8_t registerAddress, uint8_t data)
 {
   returnStatus = 0;
   returnStatus = _start();
-  if (returnStatus)
-  {
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
+  
   returnStatus = _sendAddress(SLA_W(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (2);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){send_addr_error_handler(returnStatus, TRANSMIT_MODE);}
+  
   returnStatus = _sendByte(registerAddress);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_error_handler(returnStatus);}
+  
   returnStatus = _sendByte(data);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_error_handler(returnStatus);}
+  
   returnStatus = _stop();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (7);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return stop_error_handler(returnStatus);}
+  
   return (returnStatus);
 }
 
@@ -381,49 +336,23 @@ uint8_t I2C::write(uint8_t address, uint8_t registerAddress, const uint8_t *data
 {
   returnStatus = 0;
   returnStatus = _start();
-  if (returnStatus)
-  {
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
+  
   returnStatus = _sendAddress(SLA_W(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (2);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){send_addr_error_handler(returnStatus, TRANSMIT_MODE);}
+  
   returnStatus = _sendByte(registerAddress);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_error_handler(returnStatus);}
+  
   for (uint8_t i = 0; i < numberBytes; i++)
   {
     returnStatus = _sendByte(data[i]);
-    if (returnStatus)
-    {
-      if (returnStatus == 1)
-      {
-        return (3);
-      }
-      return (returnStatus);
-    }
+    if (returnStatus){return send_error_handler(returnStatus);}
   }
+  
   returnStatus = _stop();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (7);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return stop_error_handler(returnStatus);}
+  
   return (returnStatus);
 }
 
@@ -444,59 +373,31 @@ uint8_t I2C::read(uint8_t address, uint8_t numberBytes)
   nack = numberBytes - 1;
   returnStatus = 0;
   returnStatus = _start();
-  if (returnStatus)
-  {
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
+  
   returnStatus = _sendAddress(SLA_R(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (5);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, RECEIVER_MODE);}
+  
   for (uint8_t i = 0; i < numberBytes; i++)
   {
     if (i == nack)
     {
       returnStatus = _receiveByte(0);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-
-      if (returnStatus != MR_DATA_NACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
     }
     else
     {
       returnStatus = _receiveByte(1);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-      if (returnStatus != MR_DATA_ACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
+      
     }
     data[i] = TWDR;
     bytesAvailable = i + 1;
     totalBytes = i + 1;
   }
   returnStatus = _stop();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (7);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return stop_error_handler(returnStatus);}
+  
   return (returnStatus);
 }
 
@@ -517,85 +418,39 @@ uint8_t I2C::read(uint8_t address, uint8_t registerAddress, uint8_t numberBytes)
   nack = numberBytes - 1;
   returnStatus = 0;
   returnStatus = _start();
-  if (returnStatus)
-  {
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
+  
   returnStatus = _sendAddress(SLA_W(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (2);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, TRANSMIT_MODE);}
+  
   returnStatus = _sendByte(registerAddress);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, RECEIVER_MODE);}
+  
   returnStatus = _start();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (4);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, REPEATED_START_MODE);}
+  
   returnStatus = _sendAddress(SLA_R(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (5);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, RECEIVER_MODE);}
+  
   for (uint8_t i = 0; i < numberBytes; i++)
   {
     if (i == nack)
     {
       returnStatus = _receiveByte(0);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-      if (returnStatus != MR_DATA_NACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
     }
     else
     {
       returnStatus = _receiveByte(1);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-      if (returnStatus != MR_DATA_ACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
     }
     data[i] = TWDR;
     bytesAvailable = i + 1;
     totalBytes = i + 1;
   }
   returnStatus = _stop();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (7);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return stop_error_handler(returnStatus);}
+  
   return (returnStatus);
 }
 
@@ -610,58 +465,30 @@ uint8_t I2C::read(uint8_t address, uint8_t numberBytes, uint8_t *dataBuffer)
   nack = numberBytes - 1;
   returnStatus = 0;
   returnStatus = _start();
-  if (returnStatus)
-  {
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
+  
   returnStatus = _sendAddress(SLA_R(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (5);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, RECEIVER_MODE);}
+  
   for (uint8_t i = 0; i < numberBytes; i++)
   {
     if (i == nack)
     {
       returnStatus = _receiveByte(0);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-      if (returnStatus != MR_DATA_NACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
     }
     else
     {
       returnStatus = _receiveByte(1);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-      if (returnStatus != MR_DATA_ACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
     }
     dataBuffer[i] = TWDR;
     bytesAvailable = i + 1;
     totalBytes = i + 1;
   }
   returnStatus = _stop();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (7);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return stop_error_handler(returnStatus);}
+  
   return (returnStatus);
 }
 
@@ -676,58 +503,30 @@ uint8_t I2C::read(uint8_t address, uint16_t numberBytes, uint8_t *dataBuffer)
   uint16_t nack = numberBytes - 1;
   returnStatus = 0;
   returnStatus = _start();
-  if (returnStatus)
-  {
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
+  
   returnStatus = _sendAddress(SLA_R(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (5);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, RECEIVER_MODE);}
+  
   for (uint16_t i = 0; i < numberBytes; i++)
   {
     if (i == nack)
     {
       returnStatus = _receiveByte(0);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-      if (returnStatus != MR_DATA_NACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
     }
     else
     {
       returnStatus = _receiveByte(1);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-      if (returnStatus != MR_DATA_ACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
     }
     dataBuffer[i] = TWDR;
     bytesAvailable = i + 1;
     totalBytes = i + 1;
   }
   returnStatus = _stop();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (7);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return stop_error_handler(returnStatus);}
+  
   return (returnStatus);
 }
 
@@ -742,85 +541,39 @@ uint8_t I2C::read(uint8_t address, uint8_t registerAddress, uint8_t numberBytes,
   nack = numberBytes - 1;
   returnStatus = 0;
   returnStatus = _start();
-  if (returnStatus)
-  {
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
+  
   returnStatus = _sendAddress(SLA_W(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (2);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, TRANSMIT_MODE);}
+  
   returnStatus = _sendByte(registerAddress);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, RECEIVER_MODE);}
+  
   returnStatus = _start();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (4);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, REPEATED_START_MODE);}
+  
   returnStatus = _sendAddress(SLA_R(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (5);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, RECEIVER_MODE);}
+  
   for (uint8_t i = 0; i < numberBytes; i++)
   {
     if (i == nack)
     {
       returnStatus = _receiveByte(0);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-      if (returnStatus != MR_DATA_NACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
     }
     else
     {
       returnStatus = _receiveByte(1);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-      if (returnStatus != MR_DATA_ACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
     }
     dataBuffer[i] = TWDR;
     bytesAvailable = i + 1;
     totalBytes = i + 1;
   }
   returnStatus = _stop();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (7);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return stop_error_handler(returnStatus);}
+  
   return (returnStatus);
 }
 
@@ -835,85 +588,39 @@ uint8_t I2C::read(uint8_t address, uint8_t registerAddress, uint16_t numberBytes
   uint16_t nack = numberBytes - 1;
   returnStatus = 0;
   returnStatus = _start();
-  if (returnStatus)
-  {
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
+  
   returnStatus = _sendAddress(SLA_W(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (2);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, TRANSMIT_MODE);}
+  
   returnStatus = _sendByte(registerAddress);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, RECEIVER_MODE);}
+  
   returnStatus = _start();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (4);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, REPEATED_START_MODE);}
+  
   returnStatus = _sendAddress(SLA_R(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (5);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, RECEIVER_MODE);}
+  
   for (uint16_t i = 0; i < numberBytes; i++)
   {
     if (i == nack)
     {
       returnStatus = _receiveByte(0);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-      if (returnStatus != MR_DATA_NACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
     }
     else
     {
       returnStatus = _receiveByte(1);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-      if (returnStatus != MR_DATA_ACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
     }
     dataBuffer[i] = TWDR;
     bytesAvailable = i + 1;
     totalBytes = i + 1;
   }
   returnStatus = _stop();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (7);
-    }
-    return (returnStatus);
-  }
+ if (returnStatus){return stop_error_handler(returnStatus);}
+ 
   return (returnStatus);
 }
 
@@ -924,105 +631,47 @@ uint8_t I2C::write16(uint8_t address, uint16_t registerAddress)
 {
   returnStatus = 0;
   returnStatus = _start();
-  if (returnStatus)
-  {
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
+  
   returnStatus = _sendAddress(SLA_W(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (2);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, TRANSMIT_MODE);}
+  
   //Send MSB of register address
   returnStatus = _sendByte(registerAddress >> 8);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_error_handler(returnStatus);}
+  
   //Send LSB of register address
   returnStatus = _sendByte(registerAddress & 0xFF);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_error_handler(returnStatus);}
+  
   returnStatus = _stop();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (7);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return stop_error_handler(returnStatus);}
+  
   return (returnStatus);
 }
 uint8_t I2C::write16(uint8_t address, uint16_t registerAddress, uint8_t data)
 {
   returnStatus = 0;
   returnStatus = _start();
-  if (returnStatus)
-  {
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
+  
   returnStatus = _sendAddress(SLA_W(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (2);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, TRANSMIT_MODE);}
+  
   //Send MSB of register address
   returnStatus = _sendByte(registerAddress >> 8);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_error_handler(returnStatus);}
+  
   //Send LSB of register address
   returnStatus = _sendByte(registerAddress & 0xFF);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_error_handler(returnStatus);}
+  
   returnStatus = _sendByte(data);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_error_handler(returnStatus);}
+   
   returnStatus = _stop();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (7);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return stop_error_handler(returnStatus);}
+  
   return (returnStatus);
 }
 uint8_t I2C::write16(uint8_t address, uint16_t registerAddress, const char *data)
@@ -1036,60 +685,27 @@ uint8_t I2C::write16(uint8_t address, uint16_t registerAddress, const uint8_t *d
 {
   returnStatus = 0;
   returnStatus = _start();
-  if (returnStatus)
-  {
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
+  
   returnStatus = _sendAddress(SLA_W(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (2);
-    }
-    return (returnStatus);
-  }
+ if (returnStatus){return send_addr_error_handler(returnStatus, RECEIVER_MODE);}
+ 
   //Send MSB of register address
   returnStatus = _sendByte(registerAddress >> 8);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+   if (returnStatus){return send_error_handler(returnStatus);}
+   
   //Send LSB of register address
   returnStatus = _sendByte(registerAddress & 0xFF);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+   if (returnStatus){return send_error_handler(returnStatus);}
+   
   for (uint8_t i = 0; i < numberBytes; i++)
   {
     returnStatus = _sendByte(data[i]);
-    if (returnStatus)
-    {
-      if (returnStatus == 1)
-      {
-        return (3);
-      }
-      return (returnStatus);
-    }
+    if (returnStatus){return send_error_handler(returnStatus);}
   }
   returnStatus = _stop();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (7);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return stop_error_handler(returnStatus);}
+  
   return (returnStatus);
 }
 uint8_t I2C::write16(uint8_t address, uint16_t registerAddress, uint16_t data)
@@ -1151,96 +767,44 @@ uint8_t I2C::read16(uint8_t address, uint16_t registerAddress, uint8_t numberByt
   nack = numberBytes - 1;
   returnStatus = 0;
   returnStatus = _start();
-  if (returnStatus)
-  {
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
+  
   returnStatus = _sendAddress(SLA_W(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (2);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, TRANSMIT_MODE);}
+  
   //Send MSB of register address
   returnStatus = _sendByte(registerAddress >> 8);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+   if (returnStatus){return send_error_handler(returnStatus);}
+   
   //Send LSB of register address
   returnStatus = _sendByte(registerAddress & 0xFF);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+   if (returnStatus){return send_error_handler(returnStatus);}
+   
   returnStatus = _start();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (4);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, REPEATED_START_MODE);}
+  
   returnStatus = _sendAddress(SLA_R(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (5);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, RECEIVER_MODE);}
+  
   for (uint8_t i = 0; i < numberBytes; i++)
   {
     if (i == nack)
     {
       returnStatus = _receiveByte(0);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-      if (returnStatus != MR_DATA_NACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
     }
     else
     {
       returnStatus = _receiveByte(1);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-      if (returnStatus != MR_DATA_ACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
     }
     data[i] = TWDR;
     bytesAvailable = i + 1;
     totalBytes = i + 1;
   }
   returnStatus = _stop();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (7);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return stop_error_handler(returnStatus);}
+  
   return (returnStatus);
 }
 uint8_t I2C::read16(uint8_t address, uint16_t registerAddress, uint8_t numberBytes, uint8_t *dataBuffer)
@@ -1254,96 +818,43 @@ uint8_t I2C::read16(uint8_t address, uint16_t registerAddress, uint8_t numberByt
   nack = numberBytes - 1;
   returnStatus = 0;
   returnStatus = _start();
-  if (returnStatus)
-  {
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
+  
   returnStatus = _sendAddress(SLA_W(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (2);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, TRANSMIT_MODE);}
   //Send MSB of register address
   returnStatus = _sendByte(registerAddress >> 8);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_error_handler(returnStatus);}
+   
   //Send LSB of register address
   returnStatus = _sendByte(registerAddress & 0xFF);
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (3);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_error_handler(returnStatus);}
+   
   returnStatus = _start();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (4);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return start_error_handler(returnStatus, START_MODE);}
+  
   returnStatus = _sendAddress(SLA_R(address));
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (5);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return send_addr_error_handler(returnStatus, RECEIVER_MODE);}
+  
   for (uint8_t i = 0; i < numberBytes; i++)
   {
     if (i == nack)
     {
       returnStatus = _receiveByte(0);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-      if (returnStatus != MR_DATA_NACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
     }
     else
     {
       returnStatus = _receiveByte(1);
-      if (returnStatus == 1)
-      {
-        return (6);
-      }
-      if (returnStatus != MR_DATA_ACK)
-      {
-        return (returnStatus);
-      }
+      if(returnStatus){return receive_error_handler(returnStatus);}
     }
     dataBuffer[i] = TWDR;
     bytesAvailable = i + 1;
     totalBytes = i + 1;
   }
   returnStatus = _stop();
-  if (returnStatus)
-  {
-    if (returnStatus == 1)
-    {
-      return (7);
-    }
-    return (returnStatus);
-  }
+  if (returnStatus){return stop_error_handler(returnStatus);}
+  
   return (returnStatus);
 }
 
@@ -1474,32 +985,25 @@ uint8_t I2C::_receiveByte(uint8_t ack)
     lockUp();
     return (bufferedStatus);
   }
+  
+  if(ack){
+      if(TWI_STATUS == MR_DATA_ACK){return 0;}
+  }else{
+      if(TWI_STATUS == MR_DATA_NACK){return 0;}
+  }
+  
   return (TWI_STATUS);
 }
 
 uint8_t I2C::_receiveByte(uint8_t ack, uint8_t *target)
 {
   uint8_t stat = I2C::_receiveByte(ack);
-  if (stat == 1)
+  if (stat)
   {
-    return (6);
+    *target = 0x00;
+    return receive_error_handler(stat);
   }
-  if (ack)
-  {
-    if (stat != MR_DATA_ACK)
-    {
-      *target = 0x0;
-      return (stat);
-    }
-  }
-  else
-  {
-    if (stat != MR_DATA_NACK)
-    {
-      *target = 0x0;
-      return (stat);
-    }
-  }
+  
   *target = TWDR;
   // I suppose that if we get this far we're ok
   return 0;
@@ -1533,3 +1037,63 @@ void I2C::lockUp()
 }
 
 I2C I2c = I2C();
+
+/*mode variable
+  0 -  START_MODE (MT)
+  1 -  REPEATED_START_MODE (MR)
+*/
+uint8_t I2C::start_error_handler(uint8_t returnStatus, uint8_t mode){
+    if (returnStatus == 1)
+    {
+      switch (mode){
+      case START_MODE:
+        return (1);
+      case REPEATED_START_MODE:
+        return (4);
+      }
+    }
+    return (returnStatus);
+}
+
+uint8_t I2C::stop_error_handler(uint8_t returnStatus){
+    if (returnStatus == 1)
+    {
+      return (7);
+    }
+    return (returnStatus);
+}
+
+uint8_t I2C::receive_error_handler(uint8_t returnStatus){
+    if (returnStatus == 1)
+    {
+      return (6);
+    }
+    return (returnStatus);
+}
+
+uint8_t I2C::send_error_handler(uint8_t returnStatus){
+    if (returnStatus == 1)
+    {
+      return (3);
+    }
+    return (returnStatus);
+}
+
+/*mode variable
+  0 -  TRANSMIT_MODE (MT)
+  1 -  RECEIVER_MODE (MR)
+*/
+uint8_t I2C::send_addr_error_handler(uint8_t returnStatus, uint8_t mode){
+    if (returnStatus == 1)
+    {
+      switch (mode){
+      case TRANSMIT_MODE:
+        return (2);
+      case RECEIVER_MODE:
+        return (5);
+      }
+    }
+    return (returnStatus);
+}
+
+

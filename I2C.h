@@ -76,12 +76,20 @@
 #define MR_DATA_NACK 0x58
 #define LOST_ARBTRTN 0x38
 #define TWI_STATUS (TWSR & 0xF8)
+
+
+#define START_MODE (0)
+#define REPEATED_START_MODE (1)
+#define TRANSMIT_MODE (0)
+#define RECEIVER_MODE (1)
+
 #define SLA_W(address) (address << 1)
 #define SLA_R(address) ((address << 1) + 0x01)
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 
 #define MAX_BUFFER_SIZE 32
+
 
 class I2C
 {
@@ -142,6 +150,12 @@ private:
   static uint8_t bufferIndex;
   static uint8_t totalBytes;
   static uint16_t timeOutDelay;
+  
+  uint8_t start_error_handler(uint8_t, uint8_t);
+  uint8_t stop_error_handler(uint8_t);
+  uint8_t receive_error_handler(uint8_t);
+  uint8_t send_error_handler(uint8_t);
+  uint8_t send_addr_error_handler(uint8_t, uint8_t);
 };
 
 extern I2C I2c;
